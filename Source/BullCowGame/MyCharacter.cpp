@@ -7,6 +7,8 @@
 #include "Engine/World.h"
 #include "TimerManager.h"
 #include "DrawDebugHelpers.h"
+#include "Enemy.h"
+#include "Pared.h"
 
 
 AMyCharacter::AMyCharacter()
@@ -79,17 +81,36 @@ void AMyCharacter::StopShoot()
 
 void AMyCharacter::ShootTimer()
 {
-	FHitResult HitInfo;
-	bool bHasHit = GetWorld()->LineTraceSingleByChannel(HitInfo, Cam->GetComponentLocation(), Cam->GetComponentLocation() + Cam->GetForwardVector() * 1000, ECC_GameTraceChannel3);
+	TArray<FHitResult> hits;
+	float CurrentDamage = BaseDamage;
+	
+	GetWorld()->LineTraceMultiByChannel(hits, Cam->GetComponentLocation(), Cam->GetComponentLocation() + Cam->GetForwardVector() * 1000, ECC_GameTraceChannel3);
 	
 	DrawDebugLine(GetWorld(), Cam->GetComponentLocation(), Cam->GetComponentLocation() + Cam->GetForwardVector() * 1000, FColor::Red, false, 3);
 
-	UE_LOG(LogTemp, Warning, TEXT("Bone Name: %s"), *HitInfo.BoneName.ToString());
-	
-	if(bHasHit && HitInfo.GetActor())
+	for(int i = 0; i < hits.Num(); i++)
 	{
-		//HitInfo.GetActor()->Destroy();
+		UE_LOG(LogTemp, Warning, TEXT("LOOP"));
+		FHitResult HitInfo = hits[i];
 		
+		if(HitInfo.GetActor())
+		{
+			AEnemy* Enemy = Cast<AEnemy>(HitInfo.GetActor());
+			if(Enemy && Damages.Contains(HitInfo.BoneName))
+			{
+				float DamagePercentage = Damages[HitInfo.BoneName];
+				float TotalDamage = CurrentDamage * DamagePercentage;
+				Enemy->Life -= TotalDamage;
+				
+				UE_LOG(LogTemp, Warning, TEXT("Total Damage: %f"), TotalDamage);
+			}
+
+			APared* Pared = Cast<APared>(HitInfo.GetActor());
+			if(Pared)
+			{
+				CurrentDamage -= Pared->DanoAbsorer;
+			}
+		}
 	}
 }
 

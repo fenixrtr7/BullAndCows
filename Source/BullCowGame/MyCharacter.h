@@ -26,7 +26,7 @@ private:
 	void ShootTimer();
 	
 public:
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	class UCameraComponent* Cam;
 
 	UPROPERTY(VisibleAnywhere)
@@ -34,9 +34,15 @@ public:
 
 	UPROPERTY(VisibleAnywhere)
 	class USkeletalMeshComponent* Gun;
+
+	UPROPERTY(EditAnywhere)
+	TMap<FName, float> Damages;
 	
 	UPROPERTY(EditAnywhere)
 	float RotationSpeed = 45;
+
+	UPROPERTY(EditAnywhere)
+	float BaseDamage = 20;
 	
 	AMyCharacter();
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
